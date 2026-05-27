@@ -29,7 +29,7 @@ export default function Navbar({ user }: NavbarProps) {
   const [langOpen, setLangOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
-  const pathname = usePathname();
+  const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -127,7 +127,7 @@ export default function Navbar({ user }: NavbarProps) {
                     {LANGUAGES.map((lang) => (
                       <Link
                         key={lang.code}
-                        href={withLocale(pathname || "/", lang.code)}
+                        href={withLocale(pathname, lang.code)}
                         onClick={() => setLangOpen(false)}
                         className={`w-full text-start px-4 py-2.5 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center justify-between ${
                           activeLangData.code === lang.code ? "bg-white text-[#0A0A0A]" : "text-white/50 hover:text-white hover:bg-white/5"
