@@ -44,6 +44,16 @@ const config: Config = {
           900: "#7c2d12",
           950: "#431407",
         },
+        /* ── Cinematic Luxury Palette ── */
+        luxury: {
+          matte: "#050506",
+          charcoal: "#0D0F14",
+          graphite: "#161A22",
+          silver: "#A7AFBD",
+          white: "#F5F7FA",
+          purple: "#7C5CFF",
+          blue: "#5C8DFF",
+        },
         /* ── Surface ── */
         surface: {
           base: "#0d1117",
@@ -90,7 +100,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
-        display: ["var(--font-geist-sans)", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-geist-sans)", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -122,6 +132,15 @@ const config: Config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "ambient-float": {
+          "0%, 100%": { transform: "translate3d(0,0,0)" },
+          "50%": { transform: "translate3d(0,-12px,0)" },
+        },
+        "mesh-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -129,6 +148,8 @@ const config: Config = {
         "fade-in": "fade-in 0.4s ease-out both",
         "slide-in-left": "slide-in-left 0.3s ease-out both",
         shimmer: "shimmer 2s infinite linear",
+        "ambient-float": "ambient-float 7s ease-in-out infinite",
+        "mesh-shift": "mesh-shift 16s ease infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
