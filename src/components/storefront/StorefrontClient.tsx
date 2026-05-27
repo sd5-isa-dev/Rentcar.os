@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  SlidersHorizontal, Users, Settings2, ArrowUpRight, Search, Heart
+  SlidersHorizontal, Search
 } from "lucide-react";
 import CinematicHero from "./CinematicHero";
 import PremiumExperience from "./PremiumExperience";
+import VehicleShowcase from "./VehicleShowcase";
 
 /* ─────────────────────────────────────────────
    Types
@@ -48,123 +46,10 @@ const CATEGORIES = [
 /* ─────────────────────────────────────────────
    Ultra-Luxury Car Card Component
 ───────────────────────────────────────────── */
-function UltraLuxuryCarCard({ car, startDate, endDate }: { car: Car; startDate?: string; endDate?: string }) {
-  const [imgError, setImgError] = useState(false);
-  const href = `/car/${car.id}${startDate ? `?start=${startDate}&end=${endDate}` : ""}`;
-
-  let coverImage: string | null = null;
-  if (typeof car.imageUrl === 'string' && car.imageUrl.trim() !== "") {
-    try {
-      const parsed = JSON.parse(car.imageUrl);
-      coverImage = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : parsed;
-    } catch {
-      coverImage = car.imageUrl;
-    }
-  }
-
-  return (
-    <motion.div 
-      layout
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative"
-    >
-      {/* Animated Glow Background (Revealed on Hover) */}
-      <div className="absolute -inset-[1px] bg-gradient-to-b from-white/15 to-transparent rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[2px]" />
-      
-      <Link href={href} className="relative flex flex-col h-full bg-[#050505] rounded-[24px] border border-white/[0.06] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(255,255,255,0.05)]">
-        
-        {/* ── Immersive Image Container ── */}
-        <div className="relative aspect-[16/10] bg-[#111] overflow-hidden">
-          {coverImage && !imgError ? (
-            <Image
-              src={coverImage}
-              alt={car.name}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#111] to-[#222] flex items-center justify-center">
-              <span className="text-4xl font-bold text-white/10 tracking-tighter">{car.brand.toUpperCase()}</span>
-            </div>
-          )}
-
-          {/* Cinematic Vignette */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40 opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-
-          {/* Floating Top Elements */}
-          <div className="absolute top-4 start-4 end-4 flex justify-between items-start">
-            <span className="bg-white/10 backdrop-blur-xl border border-white/10 text-white text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-full shadow-lg">
-              {car.category}
-            </span>
-            <button 
-              onClick={(e) => e.preventDefault()} 
-              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all shadow-lg"
-            >
-              <Heart size={14} />
-            </button>
-          </div>
-
-          {/* Availability Status */}
-          {!car.isAvailable && (
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-white border border-white/20 px-4 py-2 rounded-full">
-                Indisponible
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* ── High-Contrast Content ── */}
-        <div className="p-6 flex flex-col flex-1 relative z-10">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">{car.brand}</p>
-              <h3 className="font-bold text-xl text-white leading-tight tracking-tight">
-                {car.model} <span className="text-white/30 font-medium">{car.year}</span>
-              </h3>
-            </div>
-            <div className="text-end shrink-0">
-              <p className="text-xl font-bold text-white leading-none">
-                {car.pricePerDay.toLocaleString("fr-MA")} <span className="text-[10px] uppercase tracking-widest text-white/40 ms-0.5">MAD</span>
-              </p>
-              <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-white/30 mt-1.5">/ jour</p>
-            </div>
-          </div>
-
-          {/* Premium Quick Action Glass Bar */}
-          <div className="mt-auto relative overflow-hidden rounded-[16px] bg-white/[0.02] border border-white/[0.04] p-1.5 transition-colors duration-300 group-hover:bg-white/[0.05]">
-            <div className="flex items-center justify-between p-2.5">
-              <div className="flex items-center gap-4 text-white/50">
-                <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest">
-                  <Users size={14} className="text-white/30" /> {car.seats}
-                </span>
-                <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest">
-                  <Settings2 size={14} className="text-white/30" /> {car.transmission === "AUTOMATIC" ? "Auto" : "Manu"}
-                </span>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-white text-[#0A0A0A] flex items-center justify-center transition-transform duration-500 group-hover:rotate-45 rtl:group-hover:-rotate-45 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <ArrowUpRight size={16} strokeWidth={2.5} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </Link>
-    </motion.div>
-  );
-}
-
 /* ─────────────────────────────────────────────
    Main Component
 ───────────────────────────────────────────── */
 export default function StorefrontClient({ cars, initialSearch }: StorefrontClientProps) {
-  const router = useRouter();
-
   // Filter State
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [maxPrice, setMaxPrice] = useState(2500);
@@ -259,12 +144,8 @@ export default function StorefrontClient({ cars, initialSearch }: StorefrontClie
       <main className="max-w-[2520px] mx-auto px-4 md:px-10 xl:px-20 py-16 md:py-24 relative z-10">
         
         {available.length > 0 && (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
-            <AnimatePresence>
-              {available.map(car => (
-                <UltraLuxuryCarCard key={car.id} car={car} startDate={initialSearch?.start} endDate={initialSearch?.end} />
-              ))}
-            </AnimatePresence>
+          <motion.div layout>
+            <VehicleShowcase cars={available} startDate={initialSearch?.start} endDate={initialSearch?.end} />
           </motion.div>
         )}
 

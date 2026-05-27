@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
@@ -23,7 +24,9 @@ export default function StorefrontLayout({
         <CinematicBackgroundEngine />
         
         {/* ── Glassmorphic Navbar & Mobile App Bar ── */}
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
 
         {/* ── Main Content Area ── */}
         {/* pb-24 ensures content isn't blocked by the mobile native app bar */}
