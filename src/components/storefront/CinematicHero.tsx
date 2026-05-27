@@ -1,159 +1,188 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Search, MapPin, Calendar, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
+import { MapPin, Calendar, ChevronRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getStorefrontMessages, isLocale, type Locale } from "@/lib/i18n";
 
-/* ── Ambient Floating Particles ── */
-const Particles = () => {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+type HeroMessages = {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  location: string;
+  pickup: string;
+  dropoff: string;
+  cta: string;
+  locationPlaceholder: string;
+};
 
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white rounded-full opacity-20 blur-[1px]"
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1000),
-            scale: Math.random() * 0.5 + 0.5,
-          }}
-          animate={{
-            y: [null, Math.random() * -200],
-            opacity: [0.2, 0.5, 0],
-          }}
-          transition={{
-            duration: Math.random() * 5 + 5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-      ))}
-    </div>
-  );
+const HERO_COPY: Record<Locale, HeroMessages> = {
+  fr: {
+    eyebrow: "Mobilité Privée",
+    title: "Redéfinissez le luxe en mouvement.",
+    subtitle: "Expérience automobile cinématique, pensée pour le Maroc.",
+    location: "Lieu",
+    pickup: "Départ",
+    dropoff: "Retour",
+    cta: "Explorer",
+    locationPlaceholder: "Aéroport, hôtel, ville...",
+  },
+  en: {
+    eyebrow: "Private Mobility",
+    title: "Redefine luxury in motion.",
+    subtitle: "A cinematic automotive experience built for Morocco.",
+    location: "Location",
+    pickup: "Pickup",
+    dropoff: "Return",
+    cta: "Explore",
+    locationPlaceholder: "Airport, hotel, city...",
+  },
+  ar: {
+    eyebrow: "تنقل خاص",
+    title: "أعد تعريف الفخامة في التنقل.",
+    subtitle: "تجربة سيارات سينمائية مصممة للمغرب.",
+    location: "الموقع",
+    pickup: "الانطلاق",
+    dropoff: "العودة",
+    cta: "استكشف",
+    locationPlaceholder: "مطار، فندق، مدينة...",
+  },
 };
 
 export default function CinematicHero({ initialSearch }: { initialSearch?: any }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Smooth Parallax setup
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
-  const yImage = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const yText = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacityText = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const langParam = searchParams.get("lang");
+  const locale: Locale = isLocale(langParam) ? langParam : "fr";
+  const navCopy = getStorefrontMessages(locale);
+  const copy = HERO_COPY[locale];
 
   const [location, setLocation] = useState(initialSearch?.location || "Tanger");
   const [startDate, setStartDate] = useState(initialSearch?.start || "");
   const [endDate, setEndDate] = useState(initialSearch?.end || "");
 
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
+  const yImage = useTransform(scrollYProgress, [0, 1], ["0%", "24%"]);
+  const yContent = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+  const opacityContent = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
+
+  const mouseX = useMotionValue(50);
+  const mouseY = useMotionValue(40);
+
+  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set(((event.clientX - rect.left) / rect.width) * 100);
+    mouseY.set(((event.clientY - rect.top) / rect.height) * 100);
+  };
+
+  const ambientStyle = useMemo(
+    () => ({
+      background: `radial-gradient(650px circle at ${mouseX.get()}% ${mouseY.get()}%, rgba(124,92,255,0.28), transparent 48%)`,
+    }),
+    [mouseX, mouseY],
+  );
+
   const handleSearch = () => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     if (location) params.set("location", location);
     if (startDate) params.set("start", startDate);
     if (endDate) params.set("end", endDate);
+    params.set("lang", locale);
     router.push(`/?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <section ref={containerRef} className="relative h-[100svh] min-h-[700px] w-full flex items-center justify-center overflow-hidden bg-[#000000]">
-      
-      {/* ── 1. The Deep Canvas (Background & Parallax) ── */}
-      <motion.div style={{ y: yImage }} className="absolute inset-0 w-full h-full">
-        {/* Hyper-premium dark automotive image */}
-        <img 
-          src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2500&auto=format&fit=crop" 
-          alt="Cinematic Mobility" 
-          className="w-full h-full object-cover opacity-60 mix-blend-lighten"
+    <section
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="relative flex h-[100svh] min-h-[720px] w-full items-center justify-center overflow-hidden"
+    >
+      <motion.div style={{ y: yImage }} className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2400&auto=format&fit=crop"
+          alt="Luxury car"
+          className="h-full w-full object-cover opacity-50"
         />
-        {/* Ambient Lighting Layers */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.08)_0%,_transparent_50%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#000000]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-[#050506]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_46%)]" />
       </motion.div>
 
-      <Particles />
+      <motion.div className="absolute inset-0" style={ambientStyle} />
 
-      {/* ── 2. Cinematic Typography ── */}
-      <motion.div 
-        style={{ y: yText, opacity: opacityText }}
-        className="relative z-20 w-full max-w-[2520px] mx-auto px-4 md:px-10 xl:px-20 flex flex-col items-center text-center mt-20"
-      >
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:3px_3px] opacity-[0.08]" />
+
+      <motion.div style={{ y: yContent, opacity: opacityContent }} className="relative z-20 mx-auto flex w-full max-w-[2520px] flex-col items-center px-4 text-center md:px-10 xl:px-20">
+        <motion.div
+          initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-9"
         >
-          <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] text-white/50 mb-6 flex items-center justify-center gap-4">
-            <span className="w-8 h-px bg-white/20" />
-            La Collection Privée
-            <span className="w-8 h-px bg-white/20" />
+          <p className="mb-5 flex items-center justify-center gap-4 text-[10px] font-semibold uppercase tracking-[0.42em] text-white/55 md:text-xs">
+            <span className="h-px w-8 bg-white/25" />
+            {copy.eyebrow}
+            <span className="h-px w-8 bg-white/25" />
           </p>
-          
-          <h1 className="text-5xl md:text-7xl lg:text-[100px] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/30 tracking-tighter leading-[0.9] mb-8 drop-shadow-2xl">
-            Redéfinissez <br className="hidden md:block"/> l'Excellence.
+
+          <h1 className="mx-auto max-w-5xl text-balance font-display text-5xl font-semibold leading-[0.92] tracking-tight text-white md:text-7xl lg:text-[92px]">
+            <span className="lux-text-gradient">{copy.title}</span>
           </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-sm text-white/65 md:text-base">{copy.subtitle}</p>
         </motion.div>
 
-        {/* ── 3. Ultra-Premium Glass Island (Search Widget) ── */}
-        {/* Note the use of `ps-`, `pe-`, `ms-` for RTL support without breaking the layout */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
+        <motion.div
+          initial={{ opacity: 0, y: 34 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-4xl relative group"
+          transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-5xl"
         >
-          {/* Animated Glow Behind the Glass */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-[2.5rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          
-          <div className="relative bg-[#0A0A0A]/40 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-2 md:p-2.5 rounded-[2rem] md:rounded-full flex flex-col md:flex-row items-stretch md:items-center gap-2 ring-1 ring-white/5">
-            
-            {/* Location */}
-            <div className="flex-1 bg-white/5 rounded-t-[1.5rem] md:rounded-full px-6 py-4 flex items-center gap-4 transition-colors hover:bg-white/10 border border-transparent hover:border-white/10">
-              <MapPin className="text-white/40 shrink-0" size={20} />
-              <div className="w-full text-start">
-                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Lieu</label>
-                <input 
-                  type="text" 
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full text-sm font-semibold text-white bg-transparent outline-none placeholder:text-white/20" 
-                  placeholder="Aéroport, Hôtel, Ville..."
-                />
-              </div>
-            </div>
-
-            {/* Dates */}
-            <div className="flex-[1.2] bg-white/5 md:rounded-full px-6 py-4 flex items-center gap-4 transition-colors hover:bg-white/10 border border-transparent hover:border-white/10">
-              <Calendar className="text-white/40 shrink-0" size={20} />
-              <div className="w-full flex items-center gap-4">
-                <div className="flex-1 text-start">
-                  <label className="block text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Départ</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-sm font-semibold text-white bg-transparent outline-none [color-scheme:dark]" />
-                </div>
-                <div className="w-px h-8 bg-white/10 shrink-0" />
-                <div className="flex-1 text-start">
-                  <label className="block text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Retour</label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-sm font-semibold text-white bg-transparent outline-none [color-scheme:dark]" />
+          <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-white/12 via-white/[0.03] to-[#7C5CFF]/18 blur-xl" />
+          <div className="lux-surface relative rounded-[1.8rem] p-2.5 ring-1 ring-white/10 md:rounded-full md:p-3">
+            <div className="flex flex-col gap-2 md:flex-row md:items-stretch">
+              <div className="flex flex-1 items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 md:rounded-full">
+                <MapPin className="shrink-0 text-white/45" size={20} />
+                <div className="w-full text-start">
+                  <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.location}</label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/25"
+                    placeholder={copy.locationPlaceholder}
+                  />
                 </div>
               </div>
-            </div>
 
-            {/* Premium Call to Action */}
-            <button 
-              onClick={handleSearch}
-              className="bg-white text-[#0A0A0A] rounded-b-[1.5rem] md:rounded-full px-8 py-5 md:py-0 md:h-full min-h-[64px] flex items-center justify-center gap-3 hover:bg-[#EAEAEA] transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 duration-200"
-            >
-              <span className="font-bold text-sm uppercase tracking-wider">Explorer</span>
-              {/* rtl:-scale-x-100 ensures the arrow flips correctly for Arabic */}
-              <ChevronRight size={18} strokeWidth={2.5} className="rtl:-scale-x-100" />
-            </button>
+              <div className="flex flex-[1.25] items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 md:rounded-full">
+                <Calendar className="shrink-0 text-white/45" size={20} />
+                <div className="flex w-full items-center gap-4">
+                  <div className="flex-1 text-start">
+                    <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.pickup}</label>
+                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-transparent text-sm font-semibold text-white outline-none [color-scheme:dark]" />
+                  </div>
+                  <div className="h-8 w-px bg-white/12" />
+                  <div className="flex-1 text-start">
+                    <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.dropoff}</label>
+                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full bg-transparent text-sm font-semibold text-white outline-none [color-scheme:dark]" />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSearch}
+                className="group flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-[#0A0A0A] transition-all duration-300 hover:scale-[1.01] hover:bg-[#EDEDED] md:rounded-full"
+              >
+                <span className="text-sm font-bold uppercase tracking-[0.14em]">{copy.cta}</span>
+                <ChevronRight size={18} strokeWidth={2.6} className="transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+              </button>
+            </div>
           </div>
         </motion.div>
 
+        <div className="mt-8 text-xs uppercase tracking-[0.18em] text-white/35">{navCopy.nav.collection}</div>
       </motion.div>
     </section>
   );
