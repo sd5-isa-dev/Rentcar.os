@@ -10,8 +10,8 @@
     --card-foreground: 210 40% 96%;
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 96%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 144 100% 5%;
+    --primary: 246 92% 68%;
+    --primary-foreground: 230 33% 7%;
     --secondary: 222 47% 12%;
     --secondary-foreground: 210 40% 96%;
     --muted: 222 47% 12%;
@@ -22,7 +22,16 @@
     --destructive-foreground: 0 0% 100%;
     --border: 217 32% 17%;
     --input: 217 32% 17%;
-    --ring: 142 71% 45%;
+    --ring: 246 92% 68%;
+    --lux-matte: 5 6 6;
+    --lux-charcoal: 13 15 20;
+    --lux-graphite: 22 26 34;
+    --lux-silver: 167 175 189;
+    --lux-white: 245 247 250;
+    --lux-purple: 124 92 255;
+    --lux-blue: 92 141 255;
+    --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
     --radius: 0.5rem;
   }
 }
@@ -33,7 +42,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv11", "ss01";
+    font-feature-settings: "cv11", "ss01", "ss03";
+    letter-spacing: -0.01em;
+    background-color: rgb(var(--lux-matte));
+    background-image: radial-gradient(circle at 10% 10%, rgba(var(--lux-purple), 0.08), transparent 38%), radial-gradient(circle at 90% 0%, rgba(var(--lux-blue), 0.08), transparent 42%);
   }
   ::-webkit-scrollbar {
     width: 5px;
@@ -47,7 +59,7 @@
     border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #22c55e;
+    background: #7c5cff;
   }
 }
 
@@ -122,5 +134,35 @@
   }
   nav, aside, header { 
     display: none !important; 
+  }
+}
+
+@layer utilities {
+  .lux-surface {
+    background: linear-gradient(150deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(24px);
+  }
+
+  .lux-text-gradient {
+    background: linear-gradient(180deg, rgba(245,247,250,1) 0%, rgba(167,175,189,0.55) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lux-mesh-bg {
+    background: linear-gradient(120deg, rgba(124,92,255,0.16), rgba(92,141,255,0.1), rgba(255,255,255,0.03));
+    background-size: 240% 240%;
+    animation: mesh-shift 16s var(--ease-smooth) infinite;
+  }
+
+  .lux-shadow {
+    box-shadow: 0 24px 80px -30px rgba(0,0,0,0.85), 0 8px 30px -14px rgba(124,92,255,0.22);
+  }
+
+  .lux-transition {
+    transition-timing-function: var(--ease-premium);
+    transition-duration: 500ms;
   }
 }
