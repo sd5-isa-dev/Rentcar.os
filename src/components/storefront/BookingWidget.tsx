@@ -2,104 +2,66 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft, ChevronRight, Shield, Clock,
-  CreditCard, AlertCircle, Check, X, Loader2, CheckCircle2
+  CreditCard, AlertCircle, Check, X, Loader2, CheckCircle2,
+  Calendar as CalendarIcon, User, Phone
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
-   Types
+   Types & Helpers
 ───────────────────────────────────────────── */
 interface BookingWidgetProps {
-  car: {
-    id: string;
-    name: string;
-    pricePerDay: number;
-    isAvailable: boolean;
-  };
-  bookedDates?: string[]; // ISO date strings: "2026-05-15"
+  car: { id: string; name: string; pricePerDay: number; isAvailable: boolean; };
+  bookedDates?: string[];
   initialStart?: string;
   initialEnd?: string;
 }
 
-/* ─────────────────────────────────────────────
-   Helpers
-───────────────────────────────────────────── */
-function formatDate(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
+const formatDate = (date: Date) => date.toISOString().split("T")[0];
+const parseDate = (str: string) => new Date(str.split("-")[0] as any, (str.split("-")[1] as any) - 1, str.split("-")[2] as any);
+const isSameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const isInRange = (date: Date, start: Date, end: Date) => date >= start && date <= end;
+const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
 
-function parseDate(str: string): Date {
-  const [y, m, d] = str.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function isSameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function isInRange(date: Date, start: Date, end: Date): boolean {
-  return date >= start && date <= end;
-}
-
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfMonth(year: number, month: number): number {
-  return new Date(year, month, 1).getDay();
-}
-
-const MONTH_NAMES = [
-  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-];
-
+const MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 const DAY_NAMES = ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"];
 
 /* ─────────────────────────────────────────────
-   Calendar Component
+   Bespoke Calendar Component
 ───────────────────────────────────────────── */
 function Calendar({
-  viewYear, viewMonth, onPrev, onNext,
-  startDate, endDate, hoverDate,
-  onDayClick, onDayHover, bookedSet, today
-}: {
-  viewYear: number; viewMonth: number;
-  onPrev: () => void; onNext: () => void;
-  startDate: Date | null; endDate: Date | null;
-  hoverDate: Date | null;
-  onDayClick: (d: Date) => void;
-  onDayHover: (d: Date | null) => void;
-  bookedSet: Set<string>;
-  today: Date;
-}) {
+  viewYear, viewMonth, onPrev, onNext, startDate, endDate, hoverDate, onDayClick, onDayHover, bookedSet, today
+}: any) {
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
-
   const rangeEnd = endDate ?? (startDate && hoverDate && hoverDate > startDate ? hoverDate : null);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <button onClick={onPrev} className="w-7 h-7 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors">
-          <ChevronLeft size={14} className="text-[#555]" />
+    <div className="bg-[#FAFAFA] rounded-2xl p-4 border border-black/[0.04]">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={onPrev} className="w-8 h-8 rounded-full bg-white shadow-sm border border-black/5 hover:border-black/10 flex items-center justify-center transition-all">
+          <ChevronLeft size={16} className="text-[#0A0A0A]" />
         </button>
-        <span className="text-[13px] font-semibold text-[#0A0A0A]">
+        <span className="text-[14px] font-bold text-[#0A0A0A]">
           {MONTH_NAMES[viewMonth]} {viewYear}
         </span>
-        <button onClick={onNext} className="w-7 h-7 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors">
-          <ChevronRight size={14} className="text-[#555]" />
+        <button onClick={onNext} className="w-8 h-8 rounded-full bg-white shadow-sm border border-black/5 hover:border-black/10 flex items-center justify-center transition-all">
+          <ChevronRight size={16} className="text-[#0A0A0A]" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 mb-1">
+      {/* Days Grid */}
+      <div className="grid grid-cols-7 mb-2">
         {DAY_NAMES.map(d => (
-          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-wider text-[#bbb] py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-[#aaa] py-1">{d}</div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-y-0.5">
+      <div className="grid grid-cols-7 gap-y-1">
         {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
         {Array.from({ length: daysInMonth }, (_, i) => {
           const day = new Date(viewYear, viewMonth, i + 1);
@@ -110,42 +72,23 @@ function Calendar({
           const isEnd = endDate ? isSameDay(day, endDate) : false;
           const isToday = isSameDay(day, today);
           const inRange = startDate && rangeEnd && !isStart && !isEnd && isInRange(day, startDate, rangeEnd);
-
           const disabled = isPast || isBooked;
 
           return (
-            <div
-              key={dateStr}
-              className={`
-                relative flex items-center justify-center
-                ${inRange ? "bg-black/[0.05]" : ""}
-                ${isStart ? "rounded-l-full" : ""}
-                ${isEnd ? "rounded-r-full" : ""}
-              `}
-            >
+            <div key={dateStr} className={`relative flex items-center justify-center h-10 ${inRange ? "bg-black/[0.03]" : ""} ${isStart ? "rounded-l-full bg-black/[0.03]" : ""} ${isEnd ? "rounded-r-full bg-black/[0.03]" : ""}`}>
               <button
-                disabled={disabled}
-                onClick={() => !disabled && onDayClick(day)}
-                onMouseEnter={() => !disabled && onDayHover(day)}
-                onMouseLeave={() => onDayHover(null)}
+                disabled={disabled} onClick={() => !disabled && onDayClick(day)} onMouseEnter={() => !disabled && onDayHover(day)} onMouseLeave={() => onDayHover(null)}
                 className={`
-                  w-8 h-8 rounded-full text-[12px] font-medium transition-all duration-150 relative z-10
-                  ${disabled
-                    ? "text-[#ccc] cursor-not-allowed line-through"
-                    : (isStart || isEnd)
-                      ? "bg-[#0A0A0A] text-white font-bold"
-                      : inRange
-                        ? "text-[#0A0A0A] hover:bg-black/10"
-                        : isToday
-                          ? "text-[#0A0A0A] ring-1 ring-[#0A0A0A] ring-inset font-semibold"
-                          : "text-[#333] hover:bg-black/5"
-                  }
+                  w-9 h-9 rounded-full text-[13px] font-bold transition-all duration-200 relative z-10 flex items-center justify-center
+                  ${disabled ? "text-[#ccc] cursor-not-allowed line-through" 
+                    : (isStart || isEnd) ? "bg-[#0A0A0A] text-white shadow-md scale-105" 
+                    : inRange ? "text-[#0A0A0A] hover:bg-black/5" 
+                    : isToday ? "text-[#0A0A0A] ring-2 ring-[#0A0A0A] ring-inset" 
+                    : "text-[#555] hover:bg-black/5 hover:text-[#0A0A0A]"}
                 `}
               >
                 {i + 1}
-                {isBooked && !isPast && (
-                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-400" />
-                )}
+                {isBooked && !isPast && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-red-400" />}
               </button>
             </div>
           );
@@ -156,18 +99,11 @@ function Calendar({
 }
 
 /* ─────────────────────────────────────────────
-   Main Widget
+   Main Booking Widget
 ───────────────────────────────────────────── */
-export default function BookingWidget({
-  car, bookedDates = [], initialStart, initialEnd
-}: BookingWidgetProps) {
+export default function BookingWidget({ car, bookedDates = [], initialStart, initialEnd }: BookingWidgetProps) {
   const router = useRouter();
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
   const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates]);
 
   const [startDate, setStartDate] = useState<Date | null>(initialStart ? parseDate(initialStart) : null);
@@ -175,21 +111,18 @@ export default function BookingWidget({
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [step, setStep] = useState<"idle" | "picking-start" | "picking-end">(
-    initialStart && initialEnd ? "idle" : "picking-start"
-  );
   
+  const [step, setStep] = useState<"idle" | "picking-start" | "picking-end">(initialStart && initialEnd ? "idle" : "picking-start");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false); // 🟢 NEW STATE FOR SUCCESS UI
+  const [isSuccess, setIsSuccess] = useState(false);
   
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [showForm, setShowForm] = useState(false);
 
-  /* Days calculation */
   const days = useMemo(() => {
     if (!startDate || !endDate) return 0;
     return Math.ceil((endDate.getTime() - startDate.getTime()) / 86400000);
@@ -199,235 +132,174 @@ export default function BookingWidget({
   const serviceFee = Math.round(subtotal * 0.05);
   const total = subtotal + serviceFee;
 
-  /* Navigation */
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-  };
+  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); } else setViewMonth(m => m - 1); };
+  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); } else setViewMonth(m => m + 1); };
 
-  /* Day click logic */
   const handleDayClick = (day: Date) => {
     if (step === "picking-start" || (step === "idle" && !endDate)) {
-      setStartDate(day);
-      setEndDate(null);
-      setStep("picking-end");
-      setShowForm(false);
+      setStartDate(day); setEndDate(null); setStep("picking-end"); setShowForm(false);
     } else if (step === "picking-end") {
-      if (day <= startDate!) {
-        setStartDate(day);
-        setEndDate(null);
-      } else {
-        setEndDate(day);
-        setStep("idle");
-      }
+      if (day <= startDate!) { setStartDate(day); setEndDate(null); } 
+      else { setEndDate(day); setStep("idle"); }
     } else {
-      setStartDate(day);
-      setEndDate(null);
-      setStep("picking-end");
-      setShowForm(false);
+      setStartDate(day); setEndDate(null); setStep("picking-end"); setShowForm(false);
     }
   };
 
-  /* 🟢 BOOKING SUBMIT FIX 🟢 */
   const handleBook = async () => {
-    if (!startDate || !endDate || !firstName || !lastName || !phone) {
-      setError("Veuillez remplir tous les champs.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
+    if (!startDate || !endDate || !firstName || !lastName || !phone) { setError("Veuillez remplir tous les champs."); return; }
+    setLoading(true); setError(null);
     try {
       const res = await fetch("/api/public/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicleId: car.id,       // FIX: Changed from carId
-          startDate: formatDate(startDate),
-          endDate: formatDate(endDate),
-          firstName, 
-          lastName, 
-          phone,
-          totalAmount: total       // FIX: Changed from totalPrice
-        })
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vehicleId: car.id, startDate: formatDate(startDate), endDate: formatDate(endDate), firstName, lastName, phone, totalAmount: total })
       });
-      
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erreur lors de la réservation.");
-      }
-      
-      // SUCCESS! Show the beautiful confirmation screen
+      if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || "Erreur de réservation."); }
       setIsSuccess(true);
-      
-    } catch (e: any) {
-      setError(e.message || "Une erreur est survenue.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (e: any) { setError(e.message || "Une erreur est survenue."); } 
+    finally { setLoading(false); }
   };
 
-  /* ── Success UI ── */
+  /* ── 1. Success UI ── */
   if (isSuccess) {
     return (
-      <div className="hidden lg:block sticky top-24">
-        <div className="bg-white rounded-2xl border border-black/[0.07] shadow-xl p-8 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
-            <CheckCircle2 className="w-8 h-8" />
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="sticky top-24 bg-white rounded-[24px] border border-black/[0.04] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] p-8 text-center overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-50 via-white to-white opacity-50" />
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/20">
+            <CheckCircle2 size={40} />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Demande Envoyée !</h2>
-          <p className="text-sm text-gray-600 font-medium leading-relaxed">
-            Votre réservation a été transmise à l'agence. Nous vous contacterons rapidement au <b>{phone}</b> pour confirmer.
+          <h2 className="text-2xl font-bold text-[#0A0A0A] mb-3 tracking-tight">Réservation confirmée !</h2>
+          <p className="text-[14px] text-[#555] font-medium leading-relaxed mb-8">
+            Excellente nouvelle, {firstName}. Votre demande a été transmise à notre agence. Nous vous contacterons au <b className="text-[#0A0A0A]">{phone}</b> dans les prochaines minutes.
           </p>
-          <button 
-            onClick={() => window.location.href = "/"}
-            className="mt-6 text-sm font-semibold text-[#0A0A0A] hover:underline"
-          >
+          <button onClick={() => router.push("/")} className="bg-[#0A0A0A] text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-[#222] transition-all shadow-lg active:scale-95 w-full">
             Retour à l'accueil
           </button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
-  /* ── Widget content (shared between desktop & mobile) ── */
+  /* ── 2. Widget Content ── */
   const widgetContent = (
-    <div className="space-y-5">
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-wider text-[#888] mb-2">
-          {step === "picking-start" ? "Sélectionnez la date de départ"
-            : step === "picking-end" ? "Sélectionnez la date de retour"
-            : "Période de location"}
-        </p>
+    <div className="flex flex-col h-full">
+      <AnimatePresence mode="popLayout">
+        
+        {/* State A: Date Selection */}
+        {!showForm && (
+          <motion.div key="calendar" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            
+            {/* Dynamic Price Header */}
+            <div className="flex items-baseline gap-2">
+              <span className="text-[32px] font-bold text-[#0A0A0A] tracking-tighter leading-none">
+                {car.pricePerDay.toLocaleString("fr-MA")}
+              </span>
+              <span className="text-[13px] font-bold uppercase tracking-widest text-[#888]">MAD / jour</span>
+            </div>
 
-        {(startDate || endDate) && (
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <div
-              className={`p-2.5 rounded-xl border cursor-pointer transition-colors ${step === "picking-start" ? "border-[#0A0A0A] bg-[#0A0A0A]/[0.03]" : "border-black/10 hover:border-black/20"}`}
-              onClick={() => { setStep("picking-start"); setEndDate(null); }}
-            >
-              <p className="text-[9px] font-bold uppercase tracking-wider text-[#aaa] mb-0.5">Départ</p>
-              <p className="text-[13px] font-semibold text-[#0A0A0A]">
-                {startDate ? startDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—"}
-              </p>
+            {/* Date Inputs */}
+            <div className="grid grid-cols-2 gap-px bg-black/[0.04] p-1 rounded-2xl">
+              <button onClick={() => { setStep("picking-start"); setEndDate(null); }} className={`flex flex-col items-start px-4 py-3 rounded-xl transition-colors ${step === "picking-start" ? "bg-white shadow-sm" : "hover:bg-black/[0.02]"}`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888] mb-1">Départ</span>
+                <span className={`text-[13px] font-bold ${startDate ? "text-[#0A0A0A]" : "text-[#aaa]"}`}>
+                  {startDate ? startDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "Ajouter date"}
+                </span>
+              </button>
+              <button onClick={() => startDate && setStep("picking-end")} className={`flex flex-col items-start px-4 py-3 rounded-xl transition-colors ${step === "picking-end" ? "bg-white shadow-sm" : "hover:bg-black/[0.02]"}`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888] mb-1">Retour</span>
+                <span className={`text-[13px] font-bold ${endDate ? "text-[#0A0A0A]" : "text-[#aaa]"}`}>
+                  {endDate ? endDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "Ajouter date"}
+                </span>
+              </button>
             </div>
-            <div
-              className={`p-2.5 rounded-xl border cursor-pointer transition-colors ${step === "picking-end" ? "border-[#0A0A0A] bg-[#0A0A0A]/[0.03]" : "border-black/10 hover:border-black/20"}`}
-              onClick={() => startDate && setStep("picking-end")}
-            >
-              <p className="text-[9px] font-bold uppercase tracking-wider text-[#aaa] mb-0.5">Retour</p>
-              <p className="text-[13px] font-semibold text-[#0A0A0A]">
-                {endDate ? endDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—"}
-              </p>
-            </div>
-          </div>
+
+            {/* Calendar */}
+            <Calendar viewYear={viewYear} viewMonth={viewMonth} onPrev={prevMonth} onNext={nextMonth} startDate={startDate} endDate={endDate} hoverDate={hoverDate} onDayClick={handleDayClick} onDayHover={setHoverDate} bookedSet={bookedSet} today={today} />
+
+            {/* Price Breakdown */}
+            {days > 0 && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#FAFAFA] rounded-2xl p-5 border border-black/[0.04] space-y-3">
+                <div className="flex justify-between text-[13px] font-medium text-[#555]">
+                  <span>{car.pricePerDay.toLocaleString("fr-MA")} MAD × {days} jour{days > 1 ? "s" : ""}</span>
+                  <span>{subtotal.toLocaleString("fr-MA")} MAD</span>
+                </div>
+                <div className="flex justify-between text-[13px] font-medium text-[#555]">
+                  <span>Frais de service (5%)</span>
+                  <span>{serviceFee.toLocaleString("fr-MA")} MAD</span>
+                </div>
+                <div className="border-t border-black/[0.06] pt-3 flex justify-between items-center mt-2">
+                  <span className="text-[14px] font-bold text-[#0A0A0A] uppercase tracking-widest">Total</span>
+                  <span className="text-[20px] font-bold text-[#0A0A0A]">{total.toLocaleString("fr-MA")} MAD</span>
+                </div>
+              </motion.div>
+            )}
+
+            {!car.isAvailable ? (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start gap-3">
+                <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[13px] font-medium text-red-800 leading-relaxed">Ce véhicule n'est pas disponible actuellement.</p>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setShowForm(true)} 
+                disabled={days === 0}
+                className="w-full bg-[#0A0A0A] text-white font-bold text-sm py-4 rounded-full hover:bg-[#222] transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-lg active:scale-95 duration-200"
+              >
+                Continuer la réservation
+              </button>
+            )}
+          </motion.div>
         )}
 
-        <Calendar
-          viewYear={viewYear}
-          viewMonth={viewMonth}
-          onPrev={prevMonth}
-          onNext={nextMonth}
-          startDate={startDate}
-          endDate={endDate}
-          hoverDate={hoverDate}
-          onDayClick={handleDayClick}
-          onDayHover={setHoverDate}
-          bookedSet={bookedSet}
-          today={today}
-        />
-
-        <div className="flex gap-4 mt-3 text-[10px] text-[#aaa]">
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#0A0A0A]" />Sélectionné</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full border border-[#0A0A0A]" />Aujourd'hui</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-300" />Réservé</span>
-        </div>
-      </div>
-
-      {days > 0 && (
-        <div className="bg-[#F8F8F6] rounded-xl p-4 space-y-2">
-          <div className="flex justify-between text-[13px] text-[#555]">
-            <span>{car.pricePerDay.toLocaleString("fr-MA")} MAD × {days} jour{days > 1 ? "s" : ""}</span>
-            <span className="font-medium text-[#0A0A0A]">{subtotal.toLocaleString("fr-MA")} MAD</span>
-          </div>
-          <div className="flex justify-between text-[13px] text-[#555]">
-            <span>Frais de service (5%)</span>
-            <span className="font-medium text-[#0A0A0A]">{serviceFee.toLocaleString("fr-MA")} MAD</span>
-          </div>
-          <div className="border-t border-black/10 pt-2 flex justify-between">
-            <span className="text-[14px] font-bold text-[#0A0A0A]">Total</span>
-            <span className="text-[14px] font-bold text-[#0A0A0A]">{total.toLocaleString("fr-MA")} MAD</span>
-          </div>
-        </div>
-      )}
-
-      {days > 0 && !showForm && (
-        <button onClick={() => setShowForm(true)} className="w-full bg-[#0A0A0A] text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-[#222] transition-colors">
-          Continuer la réservation
-        </button>
-      )}
-
-      {days > 0 && showForm && (
-        <div className="space-y-3 animate-fade-in">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-[#888]">Vos informations</p>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-[11px] text-[#888] mb-1">Prénom</label>
-              <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Mohammed" className="w-full text-sm border border-black/10 rounded-xl px-3 py-2.5 outline-none focus:border-[#0A0A0A] transition-colors" />
+        {/* State B: User Details Form */}
+        {showForm && (
+          <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-black/5 flex items-center justify-center hover:bg-black/5 transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-[14px] font-bold text-[#0A0A0A]">Détails du conducteur</span>
             </div>
-            <div>
-              <label className="block text-[11px] text-[#888] mb-1">Nom</label>
-              <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Alami" className="w-full text-sm border border-black/10 rounded-xl px-3 py-2.5 outline-none focus:border-[#0A0A0A] transition-colors" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[11px] text-[#888] mb-1">Téléphone</label>
-            <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+212 6 00 00 00 00" type="tel" className="w-full text-sm border border-black/10 rounded-xl px-3 py-2.5 outline-none focus:border-[#0A0A0A] transition-colors" />
-          </div>
 
-          {error && (
-            <div className="flex items-start gap-2 text-[12px] text-red-500 bg-red-50 rounded-xl p-3">
-              <AlertCircle size={13} className="mt-0.5 shrink-0" />
-              {error}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
+                  <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+                </div>
+                <div className="relative">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
+                  <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+                </div>
+              </div>
+              <div className="relative">
+                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
+                <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Numéro de téléphone (+212...)" type="tel" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+              </div>
             </div>
-          )}
 
-          <button
-            onClick={handleBook}
-            disabled={loading || !firstName || !lastName || !phone}
-            className="w-full bg-[#0A0A0A] text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-[#222] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
-          >
-            {loading ? (
-              <><Loader2 size={15} className="animate-spin" />Traitement en cours…</>
-            ) : (
-              <><Check size={15} />Confirmer la réservation</>
+            {error && (
+              <div className="flex items-start gap-3 text-[13px] font-medium text-red-600 bg-red-50 rounded-2xl p-4 border border-red-100">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
+              </div>
             )}
-          </button>
-        </div>
-      )}
 
-      {!car.isAvailable && (
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[13px] font-semibold text-amber-800">Véhicule indisponible</p>
-            <p className="text-[12px] text-amber-600 mt-0.5">Activez une notification pour être alerté quand ce véhicule se libère.</p>
-          </div>
-        </div>
-      )}
+            <button
+              onClick={handleBook} disabled={loading || !firstName || !lastName || !phone}
+              className="w-full bg-[#0A0A0A] text-white font-bold text-sm py-4 rounded-full hover:bg-[#222] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg active:scale-95 duration-200"
+            >
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Traitement...</> : <><Check size={18} /> Confirmer • {total.toLocaleString("fr-MA")} MAD</>}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="border-t border-black/[0.06] pt-4 space-y-2">
-        {[
-          { icon: Shield, text: "Assurance tous risques incluse" },
-          { icon: Clock, text: "Annulation gratuite jusqu'à 24h avant" },
-          { icon: CreditCard, text: "Paiement sécurisé à l'agence" },
-        ].map(({ icon: Icon, text }) => (
-          <div key={text} className="flex items-center gap-2 text-[12px] text-[#777]">
-            <Icon size={12} className="text-[#aaa] shrink-0" />
-            {text}
+      {/* Trust Indicators Footer */}
+      <div className="mt-6 pt-6 border-t border-black/[0.04] space-y-3">
+        {[ { icon: Shield, text: "Assurance tous risques incluse" }, { icon: Clock, text: "Annulation gratuite jusqu'à 24h" }, { icon: CreditCard, text: "Paiement sécurisé à l'agence" } ].map(({ icon: Icon, text }) => (
+          <div key={text} className="flex items-center gap-3 text-[12px] font-bold text-[#888]">
+            <Icon size={14} className="text-[#0A0A0A]" /> {text}
           </div>
         ))}
       </div>
@@ -436,79 +308,52 @@ export default function BookingWidget({
 
   return (
     <>
-      <div className="hidden lg:block sticky top-24">
-        <div className="bg-white rounded-2xl border border-black/[0.07] shadow-xl p-6">
-          <div className="flex items-baseline gap-1.5 mb-5">
-            <span className="text-[28px] font-bold text-[#0A0A0A] tracking-tight">
-              {car.pricePerDay.toLocaleString("fr-MA")}
-            </span>
-            <span className="text-[14px] text-[#888] font-medium">MAD / jour</span>
-          </div>
+      {/* ── DESKTOP WIDGET ── */}
+      <div className="hidden lg:block sticky top-28 z-30">
+        <div className="bg-white rounded-[32px] border border-black/[0.04] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.12)] p-8">
           {widgetContent}
         </div>
       </div>
 
-      {/* MOBILE SHEET */}
+      {/* ── MOBILE STICKY BOTTOM BAR & DRAWER ── */}
       <div className="lg:hidden">
-        {isSuccess ? (
-          <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center px-4 text-center">
-            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-inner">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-black text-gray-900 mb-2">Réservation réussie !</h2>
-            <p className="text-gray-600 font-medium mb-8">L'agence vous contactera au {phone}.</p>
-            <button onClick={() => window.location.href = "/"} className="bg-black text-white px-8 py-4 rounded-xl font-bold w-full max-w-sm">Retour à l'accueil</button>
+        {/* Floating Sticky Bottom Bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-black/[0.06] px-6 py-4 pb-safe flex items-center justify-between gap-4 shadow-[0_-20px_40px_rgba(0,0,0,0.05)]">
+          <div>
+            <p className="text-[20px] font-bold text-[#0A0A0A] leading-none tracking-tight">
+              {car.pricePerDay.toLocaleString("fr-MA")} <span className="text-[12px] font-bold uppercase tracking-widest text-[#888]">MAD/j</span>
+            </p>
+            {days > 0 && <p className="text-[11px] font-bold text-[#0A0A0A] mt-1 underline decoration-black/20 underline-offset-4">{total.toLocaleString("fr-MA")} MAD au total</p>}
           </div>
-        ) : (
-          <>
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-black/[0.06] px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
-              <div>
-                <p className="text-[18px] font-bold text-[#0A0A0A] leading-none">
-                  {car.pricePerDay.toLocaleString("fr-MA")} <span className="text-[12px] font-medium text-[#888]">MAD/jour</span>
-                </p>
-                {days > 0 && (
-                  <p className="text-[12px] text-[#888] mt-0.5">
-                    Total: <span className="font-semibold text-[#0A0A0A]">{total.toLocaleString("fr-MA")} MAD</span>
-                  </p>
-                )}
-              </div>
-              {car.isAvailable ? (
-                <button
-                  onClick={() => setMobileOpen(true)}
-                  className="bg-[#0A0A0A] text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#222] transition-colors whitespace-nowrap"
-                >
-                  {days > 0 ? "Réserver" : "Choisir les dates"}
-                </button>
-              ) : (
-                <button className="border border-dashed border-black/20 text-[#555] font-medium text-sm px-5 py-3 rounded-xl whitespace-nowrap">
-                  M'alerter
-                </button>
-              )}
-            </div>
+          <button
+            onClick={() => setMobileOpen(true)}
+            disabled={!car.isAvailable}
+            className="bg-[#0A0A0A] text-white font-bold text-sm px-8 py-3.5 rounded-full hover:bg-[#222] transition-colors disabled:opacity-50 shadow-lg active:scale-95"
+          >
+            {days > 0 ? "Réserver" : "Voir les dates"}
+          </button>
+        </div>
 
-            {mobileOpen && (
-              <div className="fixed inset-0 z-50 flex items-end">
-                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-                <div className="relative w-full bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto">
-                  <div className="flex justify-center pt-3 pb-2"><div className="w-10 h-1 rounded-full bg-black/10" /></div>
-                  <div className="px-5 pb-8">
-                    <div className="flex items-center justify-between mb-5">
-                      <div>
-                        <p className="font-bold text-[#0A0A0A] text-base">{car.name}</p>
-                        <p className="text-[13px] text-[#888]">{car.pricePerDay.toLocaleString("fr-MA")} MAD / jour</p>
-                      </div>
-                      <button onClick={() => setMobileOpen(false)} className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center">
-                        <X size={14} className="text-[#555]" />
-                      </button>
-                    </div>
-                    {widgetContent}
-                    <div className="h-4" />
-                  </div>
+        {/* Mobile Fullscreen Drawer (Framer Motion) */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed inset-0 z-50 flex flex-col bg-white">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-black/[0.04] bg-white sticky top-0 z-10">
+                <div>
+                  <p className="font-bold text-[#0A0A0A] text-lg leading-tight">{car.name}</p>
+                  <p className="text-[12px] font-bold uppercase tracking-widest text-[#888]">{car.pricePerDay} MAD / jour</p>
                 </div>
+                <button onClick={() => setMobileOpen(false)} className="w-10 h-10 rounded-full bg-[#FAFAFA] border border-black/5 flex items-center justify-center hover:bg-black/5 transition-colors">
+                  <X size={20} className="text-[#0A0A0A]" />
+                </button>
               </div>
-            )}
-          </>
-        )}
+              <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
+                {widgetContent}
+                <div className="h-24" /> {/* Spacer for scrolling past the bottom */}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
