@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 
 // The correct import based on your tsconfig.json mapping!
 import "../styles/globals.css";
@@ -7,6 +7,12 @@ import "../styles/globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-geist-sans",
+  display: "swap",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -24,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <body
-        className={`${inter.variable} font-sans bg-[#0d1117] text-slate-100 antialiased`}
+        className={`${inter.variable} ${outfit.variable} font-sans bg-[#0d1117] text-slate-100 antialiased`}
       >
         {children}
       </body>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import SmoothScrollProvider from "@/components/storefront/SmoothScrollProvider";
+import CinematicBackgroundEngine from "@/components/storefront/background/CinematicBackgroundEngine";
 import "../../styles/globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function StorefrontLayout({
     // RTL will naturally flip layouts using Tailwind's "start/end" utilities.
     <div className="dark min-h-screen flex flex-col bg-[#000000] text-white font-sans selection:bg-white/20 selection:text-[#0A0A0A] overflow-x-hidden">
       <SmoothScrollProvider>
+        <CinematicBackgroundEngine />
         
         {/* ── Glassmorphic Navbar & Mobile App Bar ── */}
         <Navbar />
