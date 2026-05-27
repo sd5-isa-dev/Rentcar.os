@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft, ChevronRight, Shield, Clock,
-  CreditCard, AlertCircle, Check, X, Loader2, CheckCircle2,
-  Calendar as CalendarIcon, User, Phone
+  CreditCard, AlertCircle, Check, Loader2, CheckCircle2,
+  User, Phone, Sparkles, Flame
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
@@ -30,7 +30,7 @@ const MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Jui
 const DAY_NAMES = ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"];
 
 /* ─────────────────────────────────────────────
-   Bespoke Calendar Component
+   Dark Theme Calendar Component
 ───────────────────────────────────────────── */
 function Calendar({
   viewYear, viewMonth, onPrev, onNext, startDate, endDate, hoverDate, onDayClick, onDayHover, bookedSet, today
@@ -40,24 +40,24 @@ function Calendar({
   const rangeEnd = endDate ?? (startDate && hoverDate && hoverDate > startDate ? hoverDate : null);
 
   return (
-    <div className="bg-[#FAFAFA] rounded-2xl p-4 border border-black/[0.04]">
+    <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={onPrev} className="w-8 h-8 rounded-full bg-white shadow-sm border border-black/5 hover:border-black/10 flex items-center justify-center transition-all">
-          <ChevronLeft size={16} className="text-[#0A0A0A]" />
+        <button onClick={onPrev} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
+          <ChevronLeft size={16} className="text-white" />
         </button>
-        <span className="text-[14px] font-bold text-[#0A0A0A]">
+        <span className="text-[14px] font-bold text-white tracking-wide">
           {MONTH_NAMES[viewMonth]} {viewYear}
         </span>
-        <button onClick={onNext} className="w-8 h-8 rounded-full bg-white shadow-sm border border-black/5 hover:border-black/10 flex items-center justify-center transition-all">
-          <ChevronRight size={16} className="text-[#0A0A0A]" />
+        <button onClick={onNext} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
+          <ChevronRight size={16} className="text-white" />
         </button>
       </div>
 
       {/* Days Grid */}
       <div className="grid grid-cols-7 mb-2">
         {DAY_NAMES.map(d => (
-          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-[#aaa] py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-white/40 py-1">{d}</div>
         ))}
       </div>
 
@@ -75,20 +75,20 @@ function Calendar({
           const disabled = isPast || isBooked;
 
           return (
-            <div key={dateStr} className={`relative flex items-center justify-center h-10 ${inRange ? "bg-black/[0.03]" : ""} ${isStart ? "rounded-l-full bg-black/[0.03]" : ""} ${isEnd ? "rounded-r-full bg-black/[0.03]" : ""}`}>
+            <div key={dateStr} className={`relative flex items-center justify-center h-10 ${inRange ? "bg-[#D4AF37]/10" : ""} ${isStart ? "rounded-l-full bg-[#D4AF37]/10" : ""} ${isEnd ? "rounded-r-full bg-[#D4AF37]/10" : ""}`}>
               <button
                 disabled={disabled} onClick={() => !disabled && onDayClick(day)} onMouseEnter={() => !disabled && onDayHover(day)} onMouseLeave={() => onDayHover(null)}
                 className={`
                   w-9 h-9 rounded-full text-[13px] font-bold transition-all duration-200 relative z-10 flex items-center justify-center
-                  ${disabled ? "text-[#ccc] cursor-not-allowed line-through" 
-                    : (isStart || isEnd) ? "bg-[#0A0A0A] text-white shadow-md scale-105" 
-                    : inRange ? "text-[#0A0A0A] hover:bg-black/5" 
-                    : isToday ? "text-[#0A0A0A] ring-2 ring-[#0A0A0A] ring-inset" 
-                    : "text-[#555] hover:bg-black/5 hover:text-[#0A0A0A]"}
+                  ${disabled ? "text-white/20 cursor-not-allowed line-through" 
+                    : (isStart || isEnd) ? "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105" 
+                    : inRange ? "text-[#D4AF37] hover:bg-white/10" 
+                    : isToday ? "text-white ring-1 ring-[#D4AF37] ring-inset" 
+                    : "text-white/70 hover:bg-white/10 hover:text-white"}
                 `}
               >
                 {i + 1}
-                {isBooked && !isPast && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-red-400" />}
+                {isBooked && !isPast && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.8)]" />}
               </button>
             </div>
           );
@@ -163,17 +163,17 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
   /* ── 1. Success UI ── */
   if (isSuccess) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="sticky top-24 bg-white rounded-[24px] border border-black/[0.04] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] p-8 text-center overflow-hidden relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-50 via-white to-white opacity-50" />
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="sticky top-28 bg-[#0A0A0A]/90 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-2xl p-8 text-center overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D4AF37]/20 via-transparent to-transparent opacity-50" />
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/20">
+          <div className="w-20 h-20 bg-[#D4AF37] text-black rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(212,175,55,0.4)]">
             <CheckCircle2 size={40} />
           </div>
-          <h2 className="text-2xl font-bold text-[#0A0A0A] mb-3 tracking-tight">Réservation confirmée !</h2>
-          <p className="text-[14px] text-[#555] font-medium leading-relaxed mb-8">
-            Excellente nouvelle, {firstName}. Votre demande a été transmise à notre agence. Nous vous contacterons au <b className="text-[#0A0A0A]">{phone}</b> dans les prochaines minutes.
+          <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">Demande Confirmée</h2>
+          <p className="text-[14px] text-white/70 font-medium leading-relaxed mb-8">
+            Excellente nouvelle, {firstName}. Votre demande a été transmise. Un de nos concierges vous contactera au <b className="text-white">{phone}</b> dans les prochaines minutes.
           </p>
-          <button onClick={() => router.push("/")} className="bg-[#0A0A0A] text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-[#222] transition-all shadow-lg active:scale-95 w-full">
+          <button onClick={() => router.push("/")} className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm hover:bg-gray-200 transition-all shadow-lg active:scale-95 w-full uppercase tracking-wider">
             Retour à l'accueil
           </button>
         </div>
@@ -190,25 +190,30 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
         {!showForm && (
           <motion.div key="calendar" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             
-            {/* Dynamic Price Header */}
-            <div className="flex items-baseline gap-2">
-              <span className="text-[32px] font-bold text-[#0A0A0A] tracking-tighter leading-none">
-                {car.pricePerDay.toLocaleString("fr-MA")}
-              </span>
-              <span className="text-[13px] font-bold uppercase tracking-widest text-[#888]">MAD / jour</span>
+            {/* Dynamic Price Header & Urgency */}
+            <div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-[36px] font-black text-white tracking-tighter leading-none">
+                  {car.pricePerDay.toLocaleString("fr-MA")}
+                </span>
+                <span className="text-[13px] font-bold uppercase tracking-widest text-[#D4AF37]">MAD / jour</span>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] font-bold text-white/60 bg-white/5 w-fit px-3 py-1.5 rounded-full border border-white/5">
+                <Flame size={12} className="text-orange-500" /> Forte demande ce mois-ci
+              </div>
             </div>
 
             {/* Date Inputs */}
-            <div className="grid grid-cols-2 gap-px bg-black/[0.04] p-1 rounded-2xl">
-              <button onClick={() => { setStep("picking-start"); setEndDate(null); }} className={`flex flex-col items-start px-4 py-3 rounded-xl transition-colors ${step === "picking-start" ? "bg-white shadow-sm" : "hover:bg-black/[0.02]"}`}>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888] mb-1">Départ</span>
-                <span className={`text-[13px] font-bold ${startDate ? "text-[#0A0A0A]" : "text-[#aaa]"}`}>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { setStep("picking-start"); setEndDate(null); }} className={`flex flex-col items-start px-4 py-3 rounded-2xl border transition-colors ${step === "picking-start" ? "bg-white/10 border-[#D4AF37]/50" : "bg-white/5 border-white/5 hover:bg-white/10"}`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Départ</span>
+                <span className={`text-[13px] font-bold ${startDate ? "text-white" : "text-white/40"}`}>
                   {startDate ? startDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "Ajouter date"}
                 </span>
               </button>
-              <button onClick={() => startDate && setStep("picking-end")} className={`flex flex-col items-start px-4 py-3 rounded-xl transition-colors ${step === "picking-end" ? "bg-white shadow-sm" : "hover:bg-black/[0.02]"}`}>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888] mb-1">Retour</span>
-                <span className={`text-[13px] font-bold ${endDate ? "text-[#0A0A0A]" : "text-[#aaa]"}`}>
+              <button onClick={() => startDate && setStep("picking-end")} className={`flex flex-col items-start px-4 py-3 rounded-2xl border transition-colors ${step === "picking-end" ? "bg-white/10 border-[#D4AF37]/50" : "bg-white/5 border-white/5 hover:bg-white/10"}`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Retour</span>
+                <span className={`text-[13px] font-bold ${endDate ? "text-white" : "text-white/40"}`}>
                   {endDate ? endDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "Ajouter date"}
                 </span>
               </button>
@@ -219,34 +224,34 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
 
             {/* Price Breakdown */}
             {days > 0 && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#FAFAFA] rounded-2xl p-5 border border-black/[0.04] space-y-3">
-                <div className="flex justify-between text-[13px] font-medium text-[#555]">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 rounded-2xl p-5 border border-white/10 space-y-3">
+                <div className="flex justify-between text-[13px] font-medium text-white/70">
                   <span>{car.pricePerDay.toLocaleString("fr-MA")} MAD × {days} jour{days > 1 ? "s" : ""}</span>
                   <span>{subtotal.toLocaleString("fr-MA")} MAD</span>
                 </div>
-                <div className="flex justify-between text-[13px] font-medium text-[#555]">
-                  <span>Frais de service (5%)</span>
+                <div className="flex justify-between text-[13px] font-medium text-white/70">
+                  <span>Service Conciergerie (5%)</span>
                   <span>{serviceFee.toLocaleString("fr-MA")} MAD</span>
                 </div>
-                <div className="border-t border-black/[0.06] pt-3 flex justify-between items-center mt-2">
-                  <span className="text-[14px] font-bold text-[#0A0A0A] uppercase tracking-widest">Total</span>
-                  <span className="text-[20px] font-bold text-[#0A0A0A]">{total.toLocaleString("fr-MA")} MAD</span>
+                <div className="border-t border-white/10 pt-3 flex justify-between items-center mt-2">
+                  <span className="text-[14px] font-bold text-white uppercase tracking-widest">Total</span>
+                  <span className="text-[20px] font-bold text-[#D4AF37]">{total.toLocaleString("fr-MA")} MAD</span>
                 </div>
               </motion.div>
             )}
 
             {!car.isAvailable ? (
-              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start gap-3">
+              <div className="bg-red-950/30 border border-red-500/30 rounded-2xl p-4 flex items-start gap-3">
                 <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[13px] font-medium text-red-800 leading-relaxed">Ce véhicule n'est pas disponible actuellement.</p>
+                <p className="text-[13px] font-medium text-red-200 leading-relaxed">Ce véhicule n'est pas disponible pour le moment.</p>
               </div>
             ) : (
               <button 
                 onClick={() => setShowForm(true)} 
                 disabled={days === 0}
-                className="w-full bg-[#0A0A0A] text-white font-bold text-sm py-4 rounded-full hover:bg-[#222] transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-lg active:scale-95 duration-200"
+                className="w-full bg-[#D4AF37] text-black font-black uppercase tracking-wider text-sm py-4 rounded-full hover:bg-white transition-colors disabled:opacity-30 disabled:hover:bg-[#D4AF37] disabled:cursor-not-allowed shadow-[0_0_20px_rgba(212,175,55,0.3)] active:scale-95 duration-200"
               >
-                Continuer la réservation
+                Réserver ce véhicule
               </button>
             )}
           </motion.div>
@@ -256,38 +261,38 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
         {showForm && (
           <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
             <div className="flex items-center gap-3">
-              <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-black/5 flex items-center justify-center hover:bg-black/5 transition-colors">
-                <ChevronLeft size={16} />
+              <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <ChevronLeft size={16} className="text-white" />
               </button>
-              <span className="text-[14px] font-bold text-[#0A0A0A]">Détails du conducteur</span>
+              <span className="text-[14px] font-bold text-white">Détails du conducteur</span>
             </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
-                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
-                  <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
+                  <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-white bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-[#D4AF37] focus:bg-white/10 transition-all placeholder:text-white/30" />
                 </div>
                 <div className="relative">
-                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
-                  <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
+                  <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-white bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-[#D4AF37] focus:bg-white/10 transition-all placeholder:text-white/30" />
                 </div>
               </div>
               <div className="relative">
-                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" />
-                <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Numéro de téléphone (+212...)" type="tel" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-[#0A0A0A] bg-[#FAFAFA] border border-black/[0.06] rounded-2xl outline-none focus:border-[#0A0A0A] focus:bg-white transition-all" />
+                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
+                <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Téléphone (+212...)" type="tel" className="w-full pl-11 pr-4 py-3.5 text-sm font-bold text-white bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-[#D4AF37] focus:bg-white/10 transition-all placeholder:text-white/30" />
               </div>
             </div>
 
             {error && (
-              <div className="flex items-start gap-3 text-[13px] font-medium text-red-600 bg-red-50 rounded-2xl p-4 border border-red-100">
+              <div className="flex items-start gap-3 text-[13px] font-medium text-red-400 bg-red-950/30 rounded-2xl p-4 border border-red-500/30">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
               </div>
             )}
 
             <button
               onClick={handleBook} disabled={loading || !firstName || !lastName || !phone}
-              className="w-full bg-[#0A0A0A] text-white font-bold text-sm py-4 rounded-full hover:bg-[#222] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg active:scale-95 duration-200"
+              className="w-full bg-[#D4AF37] text-black font-black uppercase tracking-wider text-sm py-4 rounded-full hover:bg-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)] active:scale-95 duration-200"
             >
               {loading ? <><Loader2 size={18} className="animate-spin" /> Traitement...</> : <><Check size={18} /> Confirmer • {total.toLocaleString("fr-MA")} MAD</>}
             </button>
@@ -296,10 +301,10 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
       </AnimatePresence>
 
       {/* Trust Indicators Footer */}
-      <div className="mt-6 pt-6 border-t border-black/[0.04] space-y-3">
-        {[ { icon: Shield, text: "Assurance tous risques incluse" }, { icon: Clock, text: "Annulation gratuite jusqu'à 24h" }, { icon: CreditCard, text: "Paiement sécurisé à l'agence" } ].map(({ icon: Icon, text }) => (
-          <div key={text} className="flex items-center gap-3 text-[12px] font-bold text-[#888]">
-            <Icon size={14} className="text-[#0A0A0A]" /> {text}
+      <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+        {[ { icon: Shield, text: "Assurance Premium incluse" }, { icon: Clock, text: "Annulation gratuite jusqu'à 24h" }, { icon: Sparkles, text: "Préparation clinique du véhicule" } ].map(({ icon: Icon, text }) => (
+          <div key={text} className="flex items-center gap-3 text-[12px] font-bold text-white/50">
+            <Icon size={14} className="text-[#D4AF37]" /> {text}
           </div>
         ))}
       </div>
@@ -310,7 +315,9 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
     <>
       {/* ── DESKTOP WIDGET ── */}
       <div className="hidden lg:block sticky top-28 z-30">
-        <div className="bg-white rounded-[32px] border border-black/[0.04] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.12)] p-8">
+        <div className="bg-[#0A0A0A]/80 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5)] p-8 relative overflow-hidden">
+          {/* Subtle top glow */}
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent" />
           {widgetContent}
         </div>
       </div>
@@ -318,38 +325,39 @@ export default function BookingWidget({ car, bookedDates = [], initialStart, ini
       {/* ── MOBILE STICKY BOTTOM BAR & DRAWER ── */}
       <div className="lg:hidden">
         {/* Floating Sticky Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-black/[0.06] px-6 py-4 pb-safe flex items-center justify-between gap-4 shadow-[0_-20px_40px_rgba(0,0,0,0.05)]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#050505]/90 backdrop-blur-2xl border-t border-white/10 px-6 py-4 pb-safe flex items-center justify-between gap-4 shadow-[0_-20px_40px_rgba(0,0,0,0.8)]">
           <div>
-            <p className="text-[20px] font-bold text-[#0A0A0A] leading-none tracking-tight">
-              {car.pricePerDay.toLocaleString("fr-MA")} <span className="text-[12px] font-bold uppercase tracking-widest text-[#888]">MAD/j</span>
+            <p className="text-[20px] font-black text-white leading-none tracking-tight">
+              {car.pricePerDay.toLocaleString("fr-MA")} <span className="text-[12px] font-bold uppercase tracking-widest text-[#D4AF37]">MAD/j</span>
             </p>
-            {days > 0 && <p className="text-[11px] font-bold text-[#0A0A0A] mt-1 underline decoration-black/20 underline-offset-4">{total.toLocaleString("fr-MA")} MAD au total</p>}
+            {days > 0 && <p className="text-[11px] font-bold text-white/60 mt-1 underline decoration-white/20 underline-offset-4">{total.toLocaleString("fr-MA")} MAD total</p>}
           </div>
           <button
             onClick={() => setMobileOpen(true)}
             disabled={!car.isAvailable}
-            className="bg-[#0A0A0A] text-white font-bold text-sm px-8 py-3.5 rounded-full hover:bg-[#222] transition-colors disabled:opacity-50 shadow-lg active:scale-95"
+            className="bg-[#D4AF37] text-black font-black uppercase tracking-wider text-xs px-8 py-3.5 rounded-full hover:bg-white transition-colors disabled:opacity-50 shadow-[0_0_15px_rgba(212,175,55,0.3)] active:scale-95"
           >
-            {days > 0 ? "Réserver" : "Voir les dates"}
+            {days > 0 ? "Réserver" : "Voir dates"}
           </button>
         </div>
 
-        {/* Mobile Fullscreen Drawer (Framer Motion) */}
+        {/* Mobile Fullscreen Drawer */}
         <AnimatePresence>
           {mobileOpen && (
-            <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed inset-0 z-50 flex flex-col bg-white">
-              <div className="flex items-center justify-between px-6 py-5 border-b border-black/[0.04] bg-white sticky top-0 z-10">
+            <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed inset-0 z-50 flex flex-col bg-[#050505]">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#050505] sticky top-0 z-10">
                 <div>
-                  <p className="font-bold text-[#0A0A0A] text-lg leading-tight">{car.name}</p>
-                  <p className="text-[12px] font-bold uppercase tracking-widest text-[#888]">{car.pricePerDay} MAD / jour</p>
+                  <p className="font-bold text-white text-lg leading-tight">{car.name}</p>
+                  <p className="text-[12px] font-bold uppercase tracking-widest text-[#D4AF37]">{car.pricePerDay} MAD / jour</p>
                 </div>
-                <button onClick={() => setMobileOpen(false)} className="w-10 h-10 rounded-full bg-[#FAFAFA] border border-black/5 flex items-center justify-center hover:bg-black/5 transition-colors">
-                  <X size={20} className="text-[#0A0A0A]" />
+                <button onClick={() => setMobileOpen(false)} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                  <User size={20} className="text-white hidden" /> {/* Hidden hack to keep space */}
+                  <span className="text-white font-bold">X</span>
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
+              <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#050505]">
                 {widgetContent}
-                <div className="h-24" /> {/* Spacer for scrolling past the bottom */}
+                <div className="h-24" /> {/* Spacer for bottom scroll */}
               </div>
             </motion.div>
           )}

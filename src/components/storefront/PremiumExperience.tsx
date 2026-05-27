@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ShieldCheck, Sparkles, Key, Headphones, ArrowUpRight } from "lucide-react";
+import { ShieldCheck, Sparkles, Key, Headphones, ArrowUpRight, Star } from "lucide-react";
 
 export default function PremiumExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -11,7 +11,7 @@ export default function PremiumExperience() {
     offset: ["start end", "end start"],
   });
 
-  // Smooth parallax for the final massive background image
+  // Smooth parallax for the final massive background video
   const parallaxY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
 
   return (
@@ -38,16 +38,51 @@ export default function PremiumExperience() {
         </motion.div>
       </section>
 
+      {/* ── NEW: Trust Signals & Social Proof (CRO Optimized) ── */}
+      <section className="max-w-[2520px] mx-auto px-4 md:px-10 xl:px-20 mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex flex-col md:flex-row items-center justify-between p-8 md:p-10 rounded-[32px] border border-white/10 bg-[#0A0A0A]/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#00B67A]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+          <div className="flex flex-col mb-8 md:mb-0 relative z-10">
+             <div className="flex gap-1.5 mb-3">
+               {[1,2,3,4,5].map(i => (
+                 <div key={i} className="bg-[#00B67A] p-1.5 rounded-sm">
+                   <Star className="w-4 h-4 fill-white text-white" />
+                 </div>
+               ))}
+             </div>
+             <p className="text-white text-xl md:text-2xl font-bold tracking-tight">"Le service de location le plus irréprochable du Maroc."</p>
+             <p className="text-white/50 text-sm mt-2 font-medium">— Karim T., Client Vérifié</p>
+          </div>
+          
+          <div className="flex items-center gap-8 md:gap-12 border-t md:border-t-0 md:border-l border-white/10 pt-8 md:pt-0 md:pl-12 w-full md:w-auto relative z-10">
+             <div className="flex flex-col items-center md:items-start">
+               <span className="text-4xl font-black text-white">4.9<span className="text-xl text-white/50">/5</span></span>
+               <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold mt-1">Sur 500+ avis</span>
+             </div>
+             <div className="w-px h-16 bg-white/10 hidden md:block" />
+             <div className="flex flex-col items-center md:items-start">
+               <span className="text-4xl font-black text-[#D4AF37]">100%</span>
+               <span className="text-[10px] text-[#D4AF37]/70 uppercase tracking-widest font-bold mt-1">Flotte Certifiée</span>
+             </div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* ── 2. The Dark Frosted Bento Grid ── */}
       <section className="max-w-[2520px] mx-auto px-4 md:px-10 xl:px-20 mb-24 md:mb-40">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-[320px] md:auto-rows-[400px]">
           
-          {/* ── BENTO CARD 1: VIP Delivery (Large, Image Background) ── */}
+          {/* BENTO CARD 1: VIP Delivery */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="md:col-span-2 bg-[#050505] rounded-[32px] md:rounded-[48px] border border-white/[0.04] relative overflow-hidden group flex flex-col justify-end p-8 md:p-12"
           >
-            {/* Image & Gradient Overlays */}
             <img 
               src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2000&auto=format&fit=crop" 
               alt="Livraison VIP" 
@@ -73,14 +108,12 @@ export default function PremiumExperience() {
             </div>
           </motion.div>
 
-          {/* ── BENTO CARD 2: Concierge (Glassmorphic) ── */}
+          {/* BENTO CARD 2: Concierge */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#050505] rounded-[32px] md:rounded-[48px] border border-white/[0.04] relative overflow-hidden group p-8 md:p-12 flex flex-col"
           >
-            {/* Ambient Animated Glow */}
             <div className="absolute top-0 end-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/3 group-hover:bg-white/10 transition-colors duration-700" />
-            
             <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-auto relative z-10">
               <Headphones size={24} strokeWidth={1.5} className="text-white" />
             </div>
@@ -92,13 +125,12 @@ export default function PremiumExperience() {
             </div>
           </motion.div>
 
-          {/* ── BENTO CARD 3: Certified Fleet (Glassmorphic) ── */}
+          {/* BENTO CARD 3: Certified Fleet */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#050505] rounded-[32px] md:rounded-[48px] border border-white/[0.04] relative overflow-hidden group p-8 md:p-12 flex flex-col"
           >
             <div className="absolute bottom-0 start-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/3 group-hover:bg-white/10 transition-colors duration-700" />
-            
             <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-auto relative z-10">
               <Sparkles size={24} strokeWidth={1.5} className="text-white" />
             </div>
@@ -110,12 +142,11 @@ export default function PremiumExperience() {
             </div>
           </motion.div>
 
-          {/* ── BENTO CARD 4: Insurance (Wide, Immersive Dark) ── */}
+          {/* BENTO CARD 4: Insurance */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="md:col-span-2 bg-[#050505] rounded-[32px] md:rounded-[48px] border border-white/[0.04] relative overflow-hidden group flex flex-col justify-end p-8 md:p-12"
           >
-            {/* Subtle Abstract Dark Pattern/Noise could go here, using a sleek gradient for now */}
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10 h-full">
@@ -131,7 +162,6 @@ export default function PremiumExperience() {
                 </div>
               </div>
               
-              {/* Abstract Security Graphic */}
               <div className="w-full md:w-1/2 aspect-square md:aspect-auto md:h-full rounded-3xl border border-white/10 bg-white/[0.02] relative overflow-hidden flex items-center justify-center group-hover:border-white/20 transition-colors">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_0%,_transparent_70%)]" />
                 <ShieldCheck size={80} strokeWidth={0.5} className="text-white/10" />
@@ -142,17 +172,31 @@ export default function PremiumExperience() {
         </div>
       </section>
 
-      {/* ── 3. The Grand Cinematic Parallax Banner ── */}
-      {/* This creates a breathtaking window into a luxury lifestyle scene */}
+      {/* ── 3. The Grand Cinematic Parallax Banner (VIDEO LOOP) ── */}
       <section className="relative h-[70vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">
         <motion.div style={{ y: parallaxY }} className="absolute inset-0 w-full h-[140%] -top-[20%]">
-          <img 
-            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2500&auto=format&fit=crop" 
-            alt="Driving Experience" 
-            className="w-full h-full object-cover"
-          />
-          {/* Heavy gradients to seamlessly blend the image back into the deep black background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-black/40 to-[#000000]" />
+          
+          {/* HD VIDEO BACKGROUND */}
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="w-full h-full object-cover opacity-70"
+          >
+            {/* Make sure to place your actual video file in your public/videos folder */}
+            <source src="/videos/luxury-car-loop.mp4" type="video/mp4" />
+            
+            {/* Fallback image if user browser prevents video loading */}
+            <img 
+              src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2500&auto=format&fit=crop" 
+              alt="Driving Experience" 
+              className="w-full h-full object-cover"
+            />
+          </video>
+          
+          {/* Heavy gradients to seamlessly blend the video back into the deep black background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-black/30 to-[#000000]" />
         </motion.div>
         
         <motion.div 
@@ -162,7 +206,7 @@ export default function PremiumExperience() {
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="relative z-10 text-center px-4 max-w-5xl mx-auto"
         >
-          <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] mb-6 block">
+          <span className="text-[#D4AF37] text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] mb-6 block">
             L'ultime liberté
           </span>
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl">

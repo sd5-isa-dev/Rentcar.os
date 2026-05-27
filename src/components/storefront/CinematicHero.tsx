@@ -25,7 +25,7 @@ const HERO_COPY: Record<Locale, HeroMessages> = {
     location: "Lieu",
     pickup: "Départ",
     dropoff: "Retour",
-    cta: "Explorer",
+    cta: "Vérifier la disponibilité", // Action-oriented CTA
     locationPlaceholder: "Aéroport, hôtel, ville...",
   },
   en: {
@@ -35,7 +35,7 @@ const HERO_COPY: Record<Locale, HeroMessages> = {
     location: "Location",
     pickup: "Pickup",
     dropoff: "Return",
-    cta: "Explore",
+    cta: "Check Availability", // Action-oriented CTA
     locationPlaceholder: "Airport, hotel, city...",
   },
   ar: {
@@ -45,7 +45,7 @@ const HERO_COPY: Record<Locale, HeroMessages> = {
     location: "الموقع",
     pickup: "الانطلاق",
     dropoff: "العودة",
-    cta: "استكشف",
+    cta: "التحقق من التوفر", // Action-oriented CTA
     locationPlaceholder: "مطار، فندق، مدينة...",
   },
 };
@@ -75,15 +75,8 @@ export default function CinematicHero({ initialSearch }: { initialSearch?: any }
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     mouseX.set(((event.clientX - rect.left) / rect.width) * 100);
-    mouseY.set(((event.clientY - rect.top) / rect.height) * 100);
+    mouseX.set(((event.clientY - rect.top) / rect.height) * 100);
   };
-
-  const ambientStyle = useMemo(
-    () => ({
-      background: `radial-gradient(650px circle at ${mouseX.get()}% ${mouseY.get()}%, rgba(124,92,255,0.28), transparent 48%)`,
-    }),
-    [mouseX, mouseY],
-  );
 
   const handleSearch = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -98,91 +91,88 @@ export default function CinematicHero({ initialSearch }: { initialSearch?: any }
     <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative flex h-[100svh] min-h-[720px] w-full items-center justify-center overflow-hidden"
+      className="relative flex h-[100svh] min-h-[720px] w-full items-center justify-center overflow-hidden bg-[#050506]"
     >
       <motion.div style={{ y: yImage }} className="absolute inset-0">
         <img
           src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2400&auto=format&fit=crop"
           alt="Luxury car"
-          className="h-full w-full object-cover opacity-50"
+          className="h-full w-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-[#050506]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_46%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-[#050506]" />
       </motion.div>
-
-      <motion.div className="absolute inset-0" style={ambientStyle} />
-
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:3px_3px] opacity-[0.08]" />
 
       <motion.div style={{ y: yContent, opacity: opacityContent }} className="relative z-20 mx-auto flex w-full max-w-[2520px] flex-col items-center px-4 text-center md:px-10 xl:px-20">
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-9"
+          className="mb-10"
         >
-          <p className="mb-5 flex items-center justify-center gap-4 text-[10px] font-semibold uppercase tracking-[0.42em] text-white/55 md:text-xs">
-            <span className="h-px w-8 bg-white/25" />
+          <p className="mb-5 flex items-center justify-center gap-4 text-[10px] font-semibold uppercase tracking-[0.42em] text-white/70 md:text-xs">
+            <span className="h-px w-8 bg-[#D4AF37]/50" />
             {copy.eyebrow}
-            <span className="h-px w-8 bg-white/25" />
+            <span className="h-px w-8 bg-[#D4AF37]/50" />
           </p>
-
           <h1 className="mx-auto max-w-5xl text-balance font-display text-5xl font-semibold leading-[0.92] tracking-tight text-white md:text-7xl lg:text-[92px]">
-            <span className="lux-text-gradient">{copy.title}</span>
+            {copy.title}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-sm text-white/65 md:text-base">{copy.subtitle}</p>
+          <p className="mx-auto mt-6 max-w-2xl text-sm text-white/80 md:text-base font-medium">{copy.subtitle}</p>
         </motion.div>
 
+        {/* High-Contrast Search Widget */}
         <motion.div
           initial={{ opacity: 0, y: 34 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full max-w-5xl"
         >
-          <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-white/12 via-white/[0.03] to-[#7C5CFF]/18 blur-xl" />
-          <div className="lux-surface relative rounded-[1.8rem] p-2.5 ring-1 ring-white/10 md:rounded-full md:p-3">
+          {/* Glowing Aura */}
+          <div className="absolute -inset-1.5 rounded-[2.2rem] bg-gradient-to-r from-white/10 via-[#D4AF37]/20 to-white/10 blur-2xl" />
+          
+          <div className="relative rounded-[1.8rem] p-2.5 ring-1 ring-white/30 bg-black/50 backdrop-blur-3xl md:rounded-full md:p-3 shadow-2xl">
             <div className="flex flex-col gap-2 md:flex-row md:items-stretch">
-              <div className="flex flex-1 items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 md:rounded-full">
-                <MapPin className="shrink-0 text-white/45" size={20} />
+              
+              <div className="flex flex-1 items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 md:rounded-full transition-colors hover:bg-white/10">
+                <MapPin className="shrink-0 text-[#D4AF37]" size={20} />
                 <div className="w-full text-start">
-                  <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.location}</label>
+                  <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-widest text-white/50">{copy.location}</label>
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/25"
+                    className="w-full bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/30"
                     placeholder={copy.locationPlaceholder}
                   />
                 </div>
               </div>
 
-              <div className="flex flex-[1.25] items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 md:rounded-full">
-                <Calendar className="shrink-0 text-white/45" size={20} />
+              <div className="flex flex-[1.25] items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 md:rounded-full transition-colors hover:bg-white/10">
+                <Calendar className="shrink-0 text-[#D4AF37]" size={20} />
                 <div className="flex w-full items-center gap-4">
                   <div className="flex-1 text-start">
-                    <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.pickup}</label>
-                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-transparent text-sm font-semibold text-white outline-none [color-scheme:dark]" />
+                    <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-widest text-white/50">{copy.pickup}</label>
+                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-transparent text-sm font-bold text-white outline-none [color-scheme:dark]" />
                   </div>
-                  <div className="h-8 w-px bg-white/12" />
+                  <div className="h-8 w-px bg-white/20" />
                   <div className="flex-1 text-start">
-                    <label className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">{copy.dropoff}</label>
-                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full bg-transparent text-sm font-semibold text-white outline-none [color-scheme:dark]" />
+                    <label className="mb-0.5 block text-[10px] font-bold uppercase tracking-widest text-white/50">{copy.dropoff}</label>
+                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full bg-transparent text-sm font-bold text-white outline-none [color-scheme:dark]" />
                   </div>
                 </div>
               </div>
 
+              {/* Conversion-Optimized CTA */}
               <button
                 onClick={handleSearch}
-                className="group flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-[#0A0A0A] transition-all duration-300 hover:scale-[1.01] hover:bg-[#EDEDED] md:rounded-full"
+                className="group flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-8 py-4 text-black transition-all duration-300 hover:scale-[1.02] hover:bg-white md:rounded-full shadow-[0_0_20px_rgba(212,175,55,0.4)]"
               >
-                <span className="text-sm font-bold uppercase tracking-[0.14em]">{copy.cta}</span>
-                <ChevronRight size={18} strokeWidth={2.6} className="transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+                <span className="text-sm font-black uppercase tracking-widest">{copy.cta}</span>
+                <ChevronRight size={18} strokeWidth={3} className="transition-transform duration-300 group-hover:translate-x-1" />
               </button>
             </div>
           </div>
         </motion.div>
-
-        <div className="mt-8 text-xs uppercase tracking-[0.18em] text-white/35">{navCopy.nav.collection}</div>
       </motion.div>
     </section>
   );

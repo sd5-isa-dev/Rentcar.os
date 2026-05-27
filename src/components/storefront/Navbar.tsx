@@ -3,16 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-<<<<<<< HEAD
-import { User as UserIcon, Globe, Home, Compass, CalendarDays, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { getStorefrontMessages, isLocale, type Locale } from "@/lib/i18n";
-=======
 import { User as UserIcon, Globe, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getStorefrontMessages, isLocale, type Locale } from "@/lib/i18n";
 import MobileDockNav from "./MobileDockNav";
->>>>>>> 3258867 (feat(storefront): phase 6 premium vehicle showcase with mobile swipe)
 
 interface NavbarProps {
   user?: { name: string; email: string } | null;
@@ -171,28 +165,7 @@ export default function Navbar({ user }: NavbarProps) {
         </div>
       </header>
 
-<<<<<<< HEAD
-      <div className="md:hidden fixed bottom-0 start-0 end-0 z-40 bg-[#0A0A0A]/90 backdrop-blur-3xl border-t border-white/[0.08] pb-safe pt-2 px-6 flex justify-between items-center shadow-[0_-20px_40px_rgba(0,0,0,0.8)]">
-        <Link href={withLocale("/", locale)} className={`flex flex-col items-center gap-1.5 p-2 transition-colors duration-300 ${pathname === '/' ? "text-white" : "text-white/40"}`}>
-          <Home size={22} strokeWidth={pathname === '/' ? 2.5 : 1.5} />
-          <span className="text-[9px] font-bold uppercase tracking-widest">{t.nav.home}</span>
-        </Link>
-        <Link href={withLocale("/#collection", locale)} className="flex flex-col items-center gap-1.5 p-2 transition-colors duration-300 text-white/40">
-          <Compass size={22} strokeWidth={1.5} />
-          <span className="text-[9px] font-bold uppercase tracking-widest">{t.nav.explore}</span>
-        </Link>
-        <Link href={withLocale("/reservations", locale)} className="flex flex-col items-center gap-1.5 p-2 transition-colors duration-300 text-white/40">
-          <CalendarDays size={22} strokeWidth={1.5} />
-          <span className="text-[9px] font-bold uppercase tracking-widest">{t.nav.trips}</span>
-        </Link>
-        <Link href={withLocale(user ? "/profile" : "/client-login", locale)} className="flex flex-col items-center gap-1.5 p-2 transition-colors duration-300 text-white/40">
-          <UserIcon size={22} strokeWidth={1.5} />
-          <span className="text-[9px] font-bold uppercase tracking-widest">{user ? t.nav.profile : t.nav.account}</span>
-        </Link>
-      </div>
-=======
       <MobileDockNav user={user} />
->>>>>>> 3258867 (feat(storefront): phase 6 premium vehicle showcase with mobile swipe)
     </>
   );
 }
